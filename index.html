@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
     --ink:#1c2430;
@@ -460,9 +459,20 @@
   }
 
   @media print{
-    .form-panel, .topbar{ display:none; }
-    .preview-panel{ padding:0; }
-    #invoice-preview{ box-shadow:none; border:none; }
+    @page{ size: A4; margin: 12mm; }
+    html, body{ background:#ffffff; overflow:visible; height:auto; }
+    .topbar, .form-panel{ display:none !important; }
+    .layout{ display:block; }
+    .preview-panel{ padding:0; display:block; }
+    .sheet-wrap{ max-width:none; }
+    #invoice-preview{
+      box-shadow:none;
+      border:none;
+      width:100%;
+      padding:0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
   }
 
   @media (max-width: 560px){
@@ -653,6 +663,7 @@
 
       <div class="actions">
         <button class="btn" id="download-btn">Download PDF</button>
+        <div class="hint" style="text-align:center; margin-top:6px;">Opens your browser's print dialog — pick "Save as PDF" as the destination.</div>
         <button class="btn-secondary" id="reset-btn" type="button">Clear this month's entries</button>
         <div class="status" id="status"></div>
       </div>
@@ -1032,92 +1043,24 @@
       return;
     }
     btn.disabled = true;
-    setStatus("Generating PDF…");
+    var filename = "Invoice-" + slug($("inv-number").value) + "-" + slug($("from-name").value);
+    var prevTitle = document.title;
+    document.title = filename; // most browsers use the page title as the suggested PDF filename
 
-    var filename = "Invoice-" + slug($("inv-number").value) + "-" + slug($("from-name").value) + ".pdf";
-    var original = $("invoice-preview");
+    setStatus("Opening the print dialog — choose \"Save as PDF\" as the destination.", "ok");
 
-    // Render from an isolated, fixed-width off-screen clone rather than the
-    // on-page element directly. Capturing the live element depends on the
-    // page's current scroll position and viewport width, which is what was
-    // producing blank/cut PDFs on some hosts. A clone placed at a fixed
-    // position with a fixed width sidesteps all of that.
-    var wrapper = document.createElement("div");
-    wrapper.style.position = "fixed";
-    wrapper.style.top = "0";
-    wrapper.style.left = "0";
-    wrapper.style.zIndex = "-1";
-    wrapper.style.width = "760px";
-    wrapper.style.background = "#ffffff";
-    wrapper.style.pointerEvents = "none";
-
-    var clone = original.cloneNode(true);
-    clone.style.width = "760px";
-    clone.style.boxShadow = "none";
-    clone.style.border = "none";
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
-
-    var opt = {
-      margin: 0,
-      filename: filename,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        windowWidth: 760
-      },
-      jsPDF: { unit: "pt", format: "a4", orientation: "portrait" }
-    };
-
-    html2pdf().set(opt).from(clone).outputPdf("blob").then(function(blob){
-      return offerDownload(blob, filename);
-    }).catch(function(err){
-      console.error(err);
-      setStatus("Could not generate the PDF. Please try again.", "err");
-    }).finally(function(){
+    function restore(){
+      document.title = prevTitle;
       btn.disabled = false;
-      if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-    });
-  });
-
-  async function offerDownload(blob, filename){
-    try{
-      var downloads = await claude.use("downloads");
-      if (downloads){
-        try{
-          var result = await downloads.save({ filename: filename, data: blob });
-          bumpInvoiceCounter();
-          setStatus(result.status === "saved" ? "Saved: " + filename : "Delivered: " + filename, "ok");
-          return;
-        }catch(err){
-          if (err && err.code === "declined"){
-            setStatus("Download cancelled.");
-            return;
-          }
-          // fall through to browser fallback for any other error
-        }
-      }
-    }catch(e){ /* claude runtime not present, use fallback below */ }
-
-    // fallback: plain browser download
-    try{
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-      bumpInvoiceCounter();
-      setStatus("Downloaded: " + filename, "ok");
-    }catch(e){
-      console.error(e);
-      setStatus("Could not save the file in this view.", "err");
+      window.removeEventListener("afterprint", restore);
     }
-  }
+    window.addEventListener("afterprint", restore);
+    // Safety net: some mobile browsers don't fire afterprint reliably.
+    setTimeout(restore, 4000);
+
+    bumpInvoiceCounter();
+    window.print();
+  });
 })();
 </script>
 </body>
