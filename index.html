@@ -69,7 +69,7 @@
     align-items:start;
     min-width:0;
   }
-  @media (max-width: 900px){
+  @media screen and (max-width: 900px){
     .layout{ grid-template-columns: 1fr; }
   }
   .form-panel, .preview-panel{ min-width:0; }
@@ -83,7 +83,7 @@
     position:sticky;
     top:0;
   }
-  @media (max-width: 900px){
+  @media screen and (max-width: 900px){
     .form-panel{ position:static; max-height:none; border-right:none; border-bottom:1px solid var(--line); }
   }
   fieldset{
@@ -459,7 +459,7 @@
   }
 
   @media print{
-    @page{ size: A4; margin: 8mm; }
+    @page{ size: A4; margin: 10mm; }
     html, body{ background:#ffffff; overflow:visible; height:auto; }
     .topbar, .form-panel{ display:none !important; }
     .layout{ display:block; }
@@ -470,32 +470,33 @@
       border:none;
       width:100%;
       padding:0;
-      font-size:11px;
+      font-size:12px;
       line-height:1.3;
-      zoom:0.94;
+      zoom:0.97;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    .doc-head{ margin-bottom:10px; padding-bottom:8px; page-break-inside:avoid; }
-    .doc-head h2{ font-size:19px; }
-    .doc-meta{ line-height:1.5; }
+    .doc-head{ margin-bottom:12px; padding-bottom:10px; page-break-inside:avoid; }
+    .doc-head h2{ font-size:20px; }
+    .doc-meta{ line-height:1.45; }
     .party-line{ line-height:1.4; }
-    .parties{ margin-bottom:12px; gap:14px; page-break-inside:avoid; }
-    .period-strip{ margin-bottom:12px; padding:6px 10px; page-break-inside:avoid; }
+    .parties{ margin-bottom:14px; gap:14px; page-break-inside:avoid; }
+    .period-strip{ margin-bottom:14px; padding:6px 10px; page-break-inside:avoid; }
     table.items{ page-break-inside:avoid; }
     table.items thead th{ padding-bottom:4px; }
-    table.items tbody td{ padding:7px 0; }
-    .total-row td{ padding-top:6px; }
-    .in-words{ margin:2px 0 10px; }
-    .pay-box{ padding:10px 12px; margin-bottom:10px; page-break-inside:avoid; }
+    table.items tbody td{ padding:8px 0; }
+    .total-row td{ padding-top:7px; }
+    .in-words{ margin:2px 0 12px; }
+    .pay-box{ padding:10px 12px; margin-bottom:12px; page-break-inside:avoid; }
     .pay-grid{ gap:5px 16px; }
-    .notes-box{ margin-bottom:10px; }
+    .notes-box{ margin-bottom:12px; }
+    .sig-img{ max-height:38px; max-width:160px; margin-bottom:3px; }
     .sign-row{ margin-top:8px; page-break-inside:avoid; }
-    .sign-line{ padding-top:16px; }
+    .sign-line{ padding-top:14px; }
     .doc-foot{ margin-top:10px; padding-top:6px; font-size:8.5px; }
   }
 
-  @media (max-width: 560px){
+  @media screen and (max-width: 560px){
     #invoice-preview{ padding:26px 18px 22px; }
     .doc-head{ flex-direction:column; align-items:flex-start; gap:14px; }
     .doc-meta{ text-align:left; }
