@@ -1035,7 +1035,28 @@
     setStatus("Generating PDF…");
 
     var filename = "Invoice-" + slug($("inv-number").value) + "-" + slug($("from-name").value) + ".pdf";
-    var node = $("invoice-preview");
+    var original = $("invoice-preview");
+
+    // Render from an isolated, fixed-width off-screen clone rather than the
+    // on-page element directly. Capturing the live element depends on the
+    // page's current scroll position and viewport width, which is what was
+    // producing blank/cut PDFs on some hosts. A clone placed at a fixed
+    // position with a fixed width sidesteps all of that.
+    var wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.top = "0";
+    wrapper.style.left = "0";
+    wrapper.style.zIndex = "-1";
+    wrapper.style.width = "760px";
+    wrapper.style.background = "#ffffff";
+    wrapper.style.pointerEvents = "none";
+
+    var clone = original.cloneNode(true);
+    clone.style.width = "760px";
+    clone.style.boxShadow = "none";
+    clone.style.border = "none";
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
 
     var opt = {
       margin: 0,
@@ -1045,21 +1066,19 @@
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
-        scrollX: 0,
-        scrollY: -window.scrollY,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight
+        windowWidth: 760
       },
       jsPDF: { unit: "pt", format: "a4", orientation: "portrait" }
     };
 
-    html2pdf().set(opt).from(node).outputPdf("blob").then(function(blob){
+    html2pdf().set(opt).from(clone).outputPdf("blob").then(function(blob){
       return offerDownload(blob, filename);
     }).catch(function(err){
       console.error(err);
       setStatus("Could not generate the PDF. Please try again.", "err");
     }).finally(function(){
       btn.disabled = false;
+      if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
     });
   });
 
