@@ -959,8 +959,31 @@
     if (!file) return;
     var reader = new FileReader();
     reader.onload = function(ev){
-      setSignature(ev.target.result);
-      setStatus("Signature added.", "ok");
+      var img = new Image();
+      img.onload = function(){
+        var MAX_W = 420, MAX_H = 170;
+        var scale = Math.min(MAX_W / img.width, MAX_H / img.height, 1);
+        var w = Math.max(1, Math.round(img.width * scale));
+        var h = Math.max(1, Math.round(img.height * scale));
+        var canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        var dataUrl;
+        try{
+          dataUrl = canvas.toDataURL("image/png");
+        }catch(err){
+          setStatus("Couldn't process that image. Try a different file.", "err");
+          return;
+        }
+        setSignature(dataUrl);
+        setStatus("Signature added.", "ok");
+      };
+      img.onerror = function(){
+        setStatus("Couldn't read that image file.", "err");
+      };
+      img.src = ev.target.result;
     };
     reader.onerror = function(){
       setStatus("Couldn't read that image file.", "err");
