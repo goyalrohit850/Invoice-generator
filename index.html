@@ -459,7 +459,7 @@
   }
 
   @media print{
-    @page{ size: A4; margin: 12mm; }
+    @page{ size: A4; margin: 10mm; }
     html, body{ background:#ffffff; overflow:visible; height:auto; }
     .topbar, .form-panel{ display:none !important; }
     .layout{ display:block; }
@@ -470,9 +470,25 @@
       border:none;
       width:100%;
       padding:0;
+      font-size:12.5px;
+      line-height:1.35;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
+    .doc-head{ margin-bottom:14px; padding-bottom:12px; page-break-inside:avoid; }
+    .doc-head h2{ font-size:22px; }
+    .parties{ margin-bottom:16px; gap:16px; page-break-inside:avoid; }
+    .period-strip{ margin-bottom:16px; padding:7px 12px; page-break-inside:avoid; }
+    table.items{ page-break-inside:avoid; }
+    table.items thead th{ padding-bottom:5px; }
+    table.items tbody td{ padding:9px 0; }
+    .total-row td{ padding-top:8px; }
+    .in-words{ margin:2px 0 14px; }
+    .pay-box{ padding:12px 14px; margin-bottom:14px; page-break-inside:avoid; }
+    .notes-box{ margin-bottom:14px; }
+    .sign-row{ margin-top:10px; page-break-inside:avoid; }
+    .sign-line{ padding-top:22px; }
+    .doc-foot{ margin-top:14px; padding-top:8px; }
   }
 
   @media (max-width: 560px){
